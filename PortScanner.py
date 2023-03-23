@@ -2,6 +2,9 @@ import sys
 import numpy as np
 import os
 
+# Host do Metasploitable 2
+# host = '192.168.64.3'
+    
 class COLORS:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -17,11 +20,7 @@ class COLORS:
 def run_command(command : str):
     os.system(command)
 
-def specific_scan():
-
-    host = input("Digite o IP da rede ou host alvo: ")
-    # Host do Metasploitable 2
-    # host = '192.168.64.3'
+def specific_scan(host):
     
     range = input("\nDigite o intervalo de portas (ex: 1-100, 800, 945): ")
     ports = range.split(',')
@@ -41,11 +40,7 @@ def specific_scan():
         print(f"{COLORS.BOLD}{COLORS.OKGREEN}Comando sendo executado: {command}{COLORS.ENDC}")
         run_command(command)
 
-def general_scan():
-
-    host = input("Digite o IP do host alvo: ")
-    # Host do Metasploitable 2
-    # host = '192.168.64.3'
+def general_scan(host):
 
     well_known_ports = {
     20: 'File Transfer Protocol (FTP) - Data transfer over network',
@@ -68,16 +63,45 @@ def general_scan():
         print(f"{COLORS.BOLD}{COLORS.OKGREEN}Comando sendo executado: {command}{COLORS.ENDC}")
         run_command(command)
 
+def open_ports(host):
+    # Mostra portas TCP e UDP abertas
+    command = f"nmap -sV {host} | grep 'open'"
+    run_command(command)
+
+def check_vulnerabilities(host):
+    # Verifica vulnerabilidades em portas abertas
+    port = input("\nDigite a porta que deseja verificar a vulnerabilidade: ")
+    command = f"nmap -sV -p{port} - -script vuln {host}"
+    run_command(command)
+
 def main():
-    option = str(input(f"{COLORS.BOLD}{COLORS.HEADER}\nQual tipo de scan você deseja realizar? \n\n[1] Geral (Well Known Ports). \n\n[2] Específico (Range personalizado).\n\n{COLORS.ENDC}"))
+
+    host = input("Digite o IP do host alvo: ")
+
+    print(f'''{COLORS.BOLD}{COLORS.HEADER}\nQual tipo de scan você deseja realizar? 
+          \n\n[1] Geral (Well Known Ports). 
+          \n\n[2] Específico (Range personalizado).
+          \n\n[3] Verificar vulnerabilidades de portas abertas.
+          \n\n[4] Mostrar portas TCP e UDP abertas.
+          \n{COLORS.ENDC}''')
+    
+    option = str(input("Digite a opção desejada: "))
 
     if option == '1':
         print(f"{COLORS.BOLD}Executando o scan geral.{COLORS.ENDC}")
-        general_scan()
+        general_scan(host)
     
     elif option == '2':
         print(f"{COLORS.BOLD}Executando o scan específico.{COLORS.ENDC}")
-        specific_scan()
+        specific_scan(host)
+
+    elif option == '3':
+        print(f"{COLORS.BOLD}\nVerificando vulnerabilidades de portas abertas.{COLORS.ENDC}")
+        check_vulnerabilities(host)
+
+    elif option == '4':
+        print(f"{COLORS.BOLD}\nMostrando portas TCP e UDP abertas.{COLORS.ENDC}")
+        open_ports(host)
 
     else:
         print("Opção inválida.")
